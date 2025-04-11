@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH << File.join(__dir__, '../lib')
+require 'mergen'
+require 'optparse'
+
+options = {}
+parser = OptionParser.new do |opts|
+  opts.banner = 'Usage: mergen [options] PATH'
+
+  opts.on('-o', '--output FILE', 'output file') do |file|
+    options[:output] = file
+  end
+
+  opts.on('-h', '--help', 'show help message') do
+    puts opts
+    exit
+  end
+end
+
+begin
+  parser.parse!
+
+  if ARGV.empty?
+    puts 'error: PATH not specified'
+    puts parser
+    exit(1)
+  end
+
+  path = ARGV[0]
+
+  generator = Mergen::Generator.new(path)
+  diagram = generator.generate
+
+  if options[:output]
+    File.write(options[:output], diagram)
+    puts "class diagram generated in #{options[:output]}"
+  else
+    puts diagram
+  end
+rescue StandardError => e
+  puts "error: #{e.message}"
+  exit(1)
+end
